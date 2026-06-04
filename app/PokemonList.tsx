@@ -9,7 +9,11 @@ interface Pokemon {
   imageUrl: string;
 }
 
-export default function PokemonList() {
+interface PokemonListProps {
+  filterType: string;
+}
+
+export default function PokemonList({ filterType }: PokemonListProps) {
   const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
   
   useEffect(() => {
@@ -40,10 +44,15 @@ export default function PokemonList() {
     })();
   }, []);
 
+  const filteredPokemon = pokemonData.filter((pokemon) => {
+    if (filterType === "All") return true;
+    return pokemon.types.some(type => type.toLowerCase() === filterType.toLowerCase());
+  });
+
   return (
     <FlatList
       style={styles.flatList}
-      data={pokemonData}
+      data={filteredPokemon}
       keyExtractor={(item) => item.id}
       numColumns={2}
       columnWrapperStyle={styles.row}
@@ -60,10 +69,10 @@ const styles = StyleSheet.create({
     flex: 0.6,
   },
   listContainer: {
-    paddingBottom: 20,
   },
   row: {
     flex: 1,
-    justifyContent: "space-around",
+    justifyContent: "flex-start",
+    marginHorizontal: 10,
   }
 });

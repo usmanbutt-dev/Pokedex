@@ -3,8 +3,12 @@ import { useState } from "react";
 
 const POKEMON_TYPES = ["All", "Grass", "Poison", "Fire", "Water"];
 
-export default function PokemonHeader() {
-    const [activeType, setActiveType] = useState("All");
+interface PokemonHeaderProps {
+  activeType: string;
+  onFilterChange: (type: string) => void;
+}
+
+export default function PokemonHeader({ activeType, onFilterChange }: PokemonHeaderProps) {
 
     return (
         <View style={styles.container}>
@@ -24,10 +28,7 @@ export default function PokemonHeader() {
                                 isActive ? styles.buttonActive : null,
                                 pressed ? styles.buttonPressed : null
                             ]}
-                            onPress={() => {
-                                console.log(`Filtering by: ${type}`);
-                                setActiveType(type);
-                            }}
+                            onPress={() => onFilterChange(type)}
                         >
                             <Text style={[
                                 styles.buttonText,
