@@ -1,24 +1,20 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { Stack } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text} from "react-native";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+  
+  const insets = useSafeAreaInsets(); // Accounts for notches/status bars
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack screenOptions={{
+        header: () => (
+            <View style={{ height: 10 + insets.top, paddingTop: insets.top, backgroundColor: "#48D0B0" }}>
+              {/* <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>My Taller Header</Text> */}
+            </View>
+          ),
+        }}>
+      
+      <Stack.Screen name="index"/>
+    </Stack>
   );
 }
