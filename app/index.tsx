@@ -10,11 +10,8 @@ export default function Index() {
         backgroundColor: "#F8FAFC",
       }}
     >
-
-
       <PokemonHeader />
       <PokemonList />
-    
     </View>
   );
 }
