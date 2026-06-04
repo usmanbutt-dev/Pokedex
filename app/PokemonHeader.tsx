@@ -6,15 +6,27 @@ const POKEMON_TYPES = ["All", "Grass", "Poison", "Fire", "Water"];
 interface PokemonHeaderProps {
   activeType: string;
   onFilterChange: (type: string) => void;
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
 }
 
-export default function PokemonHeader({ activeType, onFilterChange }: PokemonHeaderProps) {
+export default function PokemonHeader({ 
+  activeType, 
+  onFilterChange,
+  searchTerm,
+  onSearchChange
+}: PokemonHeaderProps) {
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Pokédex</Text>
             <Text style={styles.subtitle}>Discover and train your monster team</Text>
-            <TextInput placeholder="Search Pokémon..." style={styles.searchInput} />
+            <TextInput 
+              placeholder="Search Pokémon..." 
+              style={styles.searchInput}
+              value={searchTerm}
+              onChangeText={onSearchChange}
+            />
 
             <View style={styles.buttonContainer}>
                 {POKEMON_TYPES.map((type) => {

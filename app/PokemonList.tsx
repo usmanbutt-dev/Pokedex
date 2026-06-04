@@ -11,9 +11,10 @@ interface Pokemon {
 
 interface PokemonListProps {
   filterType: string;
+  searchTerm: string;
 }
 
-export default function PokemonList({ filterType }: PokemonListProps) {
+export default function PokemonList({ filterType, searchTerm }: PokemonListProps) {
   const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
   
   useEffect(() => {
@@ -45,8 +46,18 @@ export default function PokemonList({ filterType }: PokemonListProps) {
   }, []);
 
   const filteredPokemon = pokemonData.filter((pokemon) => {
-    if (filterType === "All") return true;
-    return pokemon.types.some(type => type.toLowerCase() === filterType.toLowerCase());
+    // Filter by search term
+    const matchesSearch = pokemon.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    
+    // Filter by type
+    const matchesType = 
+      filterType === "All" || 
+      pokemon.types.some(type => type.toLowerCase() === filterType.toLowerCase());
+
+    // Both must match
+    return matchesSearch && matchesType;
   });
 
   return (
