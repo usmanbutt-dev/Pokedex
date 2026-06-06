@@ -1,5 +1,8 @@
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, ActivityIndicator } from "react-native"
 import { useState, useEffect } from "react";
+import { getCache, setCache } from "../utils/cache";
+
+const TYPES_CACHE_KEY = "cache:pokeapi:types";
 
 interface PokemonHeaderProps {
   activeType: string;
@@ -20,13 +23,22 @@ export default function PokemonHeader({
   useEffect(() => {
     const fetchTypes = async () => {
       try {
+        // Types never change — serve from cache when available
+        const cached = await getCache<string[]>(TYPES_CACHE_KEY);
+        if (cached) {
+          setTypes(cached);
+          return;
+        }
+
         const response = await fetch("https://pokeapi.co/api/v2/type");
         const data = await response.json();
-        // Capitalise each type name; exclude "unknown" and "shadow" (non-battle types)
         const filtered = (data.results as { name: string }[])
           .map((t) => t.name.charAt(0).toUpperCase() + t.name.slice(1))
           .filter((name) => name !== "Unknown" && name !== "Shadow");
-        setTypes(["All", ...filtered]);
+        const withAll = ["All", ...filtered];
+
+        setTypes(withAll);
+        setCache(TYPES_CACHE_KEY, withAll); // persist for 24 h
       } catch (error) {
         console.error("Error fetching types:", error);
       } finally {

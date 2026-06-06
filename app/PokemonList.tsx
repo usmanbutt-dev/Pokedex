@@ -1,6 +1,7 @@
 import { FlatList, StyleSheet, View, ActivityIndicator, Text } from "react-native";
 import PokemonCard from "./PokemonCard";
 import { useEffect, useState, useRef, useMemo } from "react";
+import { getCache, setCache } from "../utils/cache";
 
 interface Pokemon {
   id: string;
@@ -36,6 +37,17 @@ export default function PokemonList({ filterType, searchTerm }: PokemonListProps
     isFetchingRef.current = true;
     setIsLoading(true);
     try {
+      const pageKey = `cache:pokeapi:list:offset:${currentOffset}`;
+
+      // Serve the whole processed page from cache if available
+      const cachedPage = await getCache<Pokemon[]>(pageKey);
+      if (cachedPage) {
+        setPokemonData((prev) => [...prev, ...cachedPage]);
+        offsetRef.current = currentOffset + LIMIT;
+        // Optimistically assume more pages exist; the next fetch will correct it
+        return;
+      }
+
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon?offset=${currentOffset}&limit=${LIMIT}`
       );
@@ -48,10 +60,25 @@ export default function PokemonList({ filterType, searchTerm }: PokemonListProps
 
       const pokemonList: Pokemon[] = await Promise.all(
         data.results.map(async (item: { name: string; url: string }, index: number) => {
+          // Cache individual pokemon detail responses by their URL
+          const detailKey = `cache:pokeapi:detail-url:${item.url}`;
+          const cachedDetail = await getCache<{ types: string[]; imageUrl: string }>(detailKey);
+
+          if (cachedDetail) {
+            return {
+              id: String(currentOffset + index + 1).padStart(3, "0"),
+              name: item.name,
+              types: cachedDetail.types,
+              imageUrl: cachedDetail.imageUrl,
+            };
+          }
+
           const detailResponse = await fetch(item.url);
           const detailData = await detailResponse.json();
           const types = detailData.types.map((t: any) => t.type.name);
           const imageUrl = detailData.sprites.other["official-artwork"].front_default;
+
+          setCache(detailKey, { types, imageUrl });
 
           return {
             id: String(currentOffset + index + 1).padStart(3, "0"),
@@ -64,6 +91,7 @@ export default function PokemonList({ filterType, searchTerm }: PokemonListProps
 
       setPokemonData((prev) => [...prev, ...pokemonList]);
       offsetRef.current = currentOffset + LIMIT;
+      setCache(pageKey, pokemonList); // persist the whole processed page
     } catch (error) {
       console.error("Error fetching Pokémon data:", error);
     } finally {
@@ -123,6 +151,13 @@ export default function PokemonList({ filterType, searchTerm }: PokemonListProps
     const timer = setTimeout(async () => {
       setIsDirectSearching(true);
       try {
+        const searchKey = `cache:pokeapi:search:${trimmed}`;
+        const cachedResult = await getCache<Pokemon>(searchKey);
+        if (cachedResult) {
+          setDirectResult(cachedResult);
+          return;
+        }
+
         const response = await fetch(
           `https://pokeapi.co/api/v2/pokemon/${trimmed}`
         );
@@ -133,12 +168,14 @@ export default function PokemonList({ filterType, searchTerm }: PokemonListProps
         const data = await response.json();
         const types = data.types.map((t: any) => t.type.name);
         const imageUrl = data.sprites.other["official-artwork"].front_default;
-        setDirectResult({
+        const result: Pokemon = {
           id: String(data.id).padStart(3, "0"),
           name: data.name,
           types,
           imageUrl,
-        });
+        };
+        setDirectResult(result);
+        setCache(searchKey, result); // cache by name for future lookups
       } catch {
         setDirectResult(null);
       } finally {

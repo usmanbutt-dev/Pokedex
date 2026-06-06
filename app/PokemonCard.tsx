@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Image, Pressable, StyleSheet, Text } from "react-native";
 
 interface Pokemon {
   id: string;
@@ -29,13 +30,22 @@ const TYPE_COLORS: { [key: string]: string } = {
   dark: "#705848",
   steel: "#B8B8D0",
   fairy: "#EE99AC",
+  fighting: "#C03028",
 };
 
 export default function PokemonCard({ pokemon }: PokemonCardProps) {
   const primaryType = pokemon.types[0].toLowerCase();
   const backgroundColor = TYPE_COLORS[primaryType] || "#E2E8F0";
+
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        { backgroundColor },
+        pressed && styles.pressed,
+      ]}
+      onPress={() => router.push({ pathname: "/pokemon/[id]", params: { id: pokemon.name } })}
+    >
       <Text style={styles.ID}>#{pokemon.id}</Text>
       <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit>
         {pokemon.name}
@@ -46,7 +56,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
         </Text>
       ))}
       <Image source={{ uri: pokemon.imageUrl }} style={styles.image} />
-    </View>
+    </Pressable>
   );
 }
 
@@ -59,7 +69,11 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     paddingTop: 15,
     gap: 5,
-    alignSelf: "flex-start",  // Fix: lone cards in a row pin left, not center
+    alignSelf: "flex-start",
+  },
+  pressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.97 }],
   },
   ID: {
     fontSize: 12,
@@ -88,5 +102,5 @@ const styles = StyleSheet.create({
     right: 0,
     width: 85,
     height: 85,
-  }
+  },
 });
