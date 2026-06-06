@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
 interface Pokemon {
   id: string;
@@ -37,7 +37,9 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <Text style={styles.ID}>#{pokemon.id}</Text>
-      <Text style={styles.name}>{pokemon.name}</Text>
+      <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit>
+        {pokemon.name}
+      </Text>
       {pokemon.types.map((type) => (
         <Text key={type} style={styles.type}>
           {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -50,13 +52,14 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 150,
-    height: 150,
+    width: 160,
+    height: 160,
     borderRadius: 15,
-    margin: 10,
-    paddingLeft: 10,
+    margin: 5,
+    paddingLeft: 15,
     paddingTop: 15,
     gap: 5,
+    alignSelf: "flex-start",  // Fix: lone cards in a row pin left, not center
   },
   ID: {
     fontSize: 12,
@@ -83,7 +86,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: 80,
-    height: 80,
+    width: 85,
+    height: 85,
   }
 });
