@@ -8,7 +8,7 @@ Data comes from the free, open-source [PokéAPI](https://pokeapi.co).
 
 ## App Showcase
 
-![App Showcase](AppShowcase.mp4)
+![App Showcase](https://github.com/user-attachments/assets/3e2b6f3d-f964-4f6d-afd0-c26d8d46a619)
 
 ---
 
