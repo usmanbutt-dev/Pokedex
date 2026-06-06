@@ -54,6 +54,7 @@ export default function PokemonHeader({
       <Text style={styles.subtitle}>Discover and train your monster team</Text>
       <TextInput 
         placeholder="Search Pokémon..." 
+        placeholderTextColor="#94A3B8"
         style={styles.searchInput}
         value={searchTerm}
         onChangeText={onSearchChange}
